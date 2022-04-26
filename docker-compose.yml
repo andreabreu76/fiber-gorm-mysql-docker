@@ -1,0 +1,49 @@
+version: '3.7'
+
+services:
+  database:
+    build:
+      context: ./docker/
+      dockerfile: db.dockerfile
+    image: ${APP_ENTITY}/mysql
+    container_name: ${APP_NAME}-database
+    tty: true
+    volumes:
+      - dbdata:/var/lib/mysql
+    environment:
+      TZ: "America/Sao_Paulo"
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_PORT: ${MYSQL_PORT}
+    ports:
+      - ${MYSQL_EXT_PORT}:3306
+    networks:
+      - net
+
+  app:
+    build:
+      context: ./docker/
+      dockerfile: go.dockerfile
+    image: ${APP_ENTITY}/golang
+    container_name: ${APP_NAME}-go
+    tty: true
+    command: [ "/bin/bash", "-c", "/go/src/app/bin/air" ]
+    environment:
+      TZ: "America/Sao_Paulo"
+      SERVICE_NAME: ${APP_NAME}-go
+      SERVICE_TAGS: ${APP_ENV}
+    volumes:
+      - ./:/go/src/app/
+    ports:
+      - ${PORT}:${PORT}
+    networks:
+      - net
+
+volumes:
+  dbdata:
+    driver: local
+networks:
+  net:
+    driver: "bridge"
