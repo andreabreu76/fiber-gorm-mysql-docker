@@ -21,11 +21,14 @@ func main() {
 		CaseSensitive: true})
 
 	config.Default(app)
-	config.Connect()
+	err := config.Connect()
+	if err != nil {
+		log.Fatal(err)
+	}
 	routes.Setup(app)
 
 	port := os.Getenv("PORT")
-	err := app.Listen(":" + port)
+	err = app.Listen(":" + port)
 	if err != nil {
 		log.Fatal(err)
 	}
